@@ -2,26 +2,45 @@ package fr.lille1.raingeval.tpgooglemaps;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnMyLocationButtonClickListener {
+import java.util.List;
+import java.util.Locale;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnMyLocationButtonClickListener, OnMapClickListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private GoogleMap mMap;
     private boolean permissionDenied = false;
+
+    private Button button;
+    private EditText editText;
+    private TextView text;
+    private Geocoder geo;
+    private List<Address> list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +50,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-    }
+        this.geo = new Geocoder(this, Locale.getDefault());
 
+        this.button = (Button) findViewById(R.id.button);
+        this.editText = (EditText) findViewById(R.id.edit);
+        this.text = (TextView) findViewById((R.id.text));
+
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    List<Address> listAddresses;
+                    String locationName = editText.getText().toString();
+                    listAddresses = geo.getFromLocationName(locationName, 1);
+                    Address address = listAddresses.get(0);
+                    LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+                    mMap.clear();
+                    mMap.addMarker(new MarkerOptions().position(location).title(locationName));
+                    text.setText(
+                            "Pays:  " + address.getCountryName() + "\n" +
+                                    "Ville: " + address.getLocality() + "\n" +
+                                    "Rue:   " + address.getAddressLine(0));
+                    CameraPosition cameraPosition = new CameraPosition(location, 5, 0 ,0);
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                    mMap.animateCamera(cameraUpdate);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
 
     /**
      * Manipulates the map once available.
@@ -48,11 +95,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMapClickListener(this);
         enableMyLocation();
 
-        LatLng aPlace = new LatLng(0, 0);
-        mMap.addMarker(new MarkerOptions().position(aPlace).title("Marker"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(aPlace));
     }
 
     private void enableMyLocation() {
@@ -67,6 +112,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "Le bouton MyLocation a été cliqué", Toast.LENGTH_SHORT).show();
         return false;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+        try {
+            list = geo.getFromLocation(
+                    latLng.latitude,
+                    latLng.longitude, 1);
+            text.setText(
+                    "Pays:  " + list.get(0).getCountryName() + "\n" +
+                            "Ville: " + list.get(0).getLocality() + "\n" +
+                            "Rue:   " + list.get(0).getAddressLine(0));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(latLng).title("Vous avez cliqué là."));
     }
 
     @Override
