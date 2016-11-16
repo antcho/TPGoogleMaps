@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">TPGoogleMaps</string>
     <string name="title_activity_maps">TPGoogleMaps</string>
+
+    <string name="search_button">Chercher un lieu</string>
+
 </resources>

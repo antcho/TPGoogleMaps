@@ -19,7 +19,6 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -27,6 +26,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,18 +39,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button button;
     private EditText editText;
     private TextView text;
-    private Geocoder geo;
-    private List<Address> list;
+    private Geocoder geocoder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        this.geo = new Geocoder(this, Locale.getDefault());
+
+        this.geocoder = new Geocoder(this, Locale.getDefault());
 
         this.button = (Button) findViewById(R.id.button);
         this.editText = (EditText) findViewById(R.id.edit);
@@ -61,19 +62,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     List<Address> listAddresses;
                     String locationName = editText.getText().toString();
-                    listAddresses = geo.getFromLocationName(locationName, 1);
+                    listAddresses = geocoder.getFromLocationName(locationName, 1);
                     Address address = listAddresses.get(0);
                     LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+
                     mMap.clear();
                     mMap.addMarker(new MarkerOptions().position(location).title(locationName));
-                    text.setText(
-                            "Pays:  " + address.getCountryName() + "\n" +
-                                    "Ville: " + address.getLocality() + "\n" +
-                                    "Rue:   " + address.getAddressLine(0));
+
+                    editAddressTextView(address);
+
                     CameraPosition cameraPosition = new CameraPosition(location, 5, 0 ,0);
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+
                     mMap.animateCamera(cameraUpdate);
-                } catch (Exception e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -84,8 +87,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -96,16 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMapClickListener(this);
+
         enableMyLocation();
-
-    }
-
-    private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        } else if (mMap != null) {
-            mMap.setMyLocationEnabled(true);
-        }
     }
 
     @Override
@@ -116,22 +109,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng latLng) {
-
+        List<Address> list;
         try {
-            list = geo.getFromLocation(
-                    latLng.latitude,
-                    latLng.longitude, 1);
-            text.setText(
-                    "Pays:  " + list.get(0).getCountryName() + "\n" +
-                            "Ville: " + list.get(0).getLocality() + "\n" +
-                            "Rue:   " + list.get(0).getAddressLine(0));
+            list = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            editAddressTextView(list.get(0));
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(latLng).title("Vous avez cliqué là."));
+        mMap.addMarker(new MarkerOptions().position(latLng).title("Vous avez cliqué ici"));
     }
 
     @Override
@@ -149,9 +137,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
+
         if (permissionDenied) {
             Toast.makeText(this, "Vous n'avez pas donné les permissions de localisation", Toast.LENGTH_SHORT).show();
             permissionDenied = false;
         }
+    }
+
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else if (mMap != null) {
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+
+    private void editAddressTextView(Address address) {
+        text.setText(
+                "Pays:  " + address.getCountryName() + "\n" +
+                "Ville: " + address.getLocality() + "\n");
     }
 }
