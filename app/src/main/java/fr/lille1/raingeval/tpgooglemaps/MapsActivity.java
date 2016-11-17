@@ -45,41 +45,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         this.geocoder = new Geocoder(this, Locale.getDefault());
-
         this.button = (Button) findViewById(R.id.button);
         this.editText = (EditText) findViewById(R.id.edit);
         this.text = (TextView) findViewById((R.id.text));
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    List<Address> listAddresses;
-                    String locationName = editText.getText().toString();
-                    listAddresses = geocoder.getFromLocationName(locationName, 1);
-                    Address address = listAddresses.get(0);
-                    LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
-
-                    mMap.clear();
-                    mMap.addMarker(new MarkerOptions().position(location).title(locationName));
-
-                    editAddressTextView(address);
-
-                    CameraPosition cameraPosition = new CameraPosition(location, 5, 0 ,0);
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-
-                    mMap.animateCamera(cameraUpdate);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                //TODO 7: Gérer le clic sur le bouton afin d'afficher sur la carte le lieu choisi
             }
         });
     }
@@ -109,52 +87,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng latLng) {
-        List<Address> list;
-        try {
-            list = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-            editAddressTextView(list.get(0));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(latLng).title("Vous avez cliqué ici"));
+        //TODO 5: Au clic sur la map, récupérer les coordonnées du point, y placer un marqueur, et appeler la méthode editAddressTextView()
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return;
-        }
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            enableMyLocation();
-        } else {
-            permissionDenied = true;
-        }
+        //TODO 3: Gérer le résultat de la demande de permission de localisation
     }
 
     @Override
     protected void onResumeFragments() {
-        super.onResumeFragments();
-
-        if (permissionDenied) {
-            Toast.makeText(this, "Vous n'avez pas donné les permissions de localisation", Toast.LENGTH_SHORT).show();
-            permissionDenied = false;
-        }
+        //TODO 4: Si les permissions de localisation n'ont pas été acceptées, afficher un message
     }
 
     private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        } else if (mMap != null) {
-            mMap.setMyLocationEnabled(true);
-        }
+        //TODO 2: Autoriser Maps à accéder à la localisation de l'appareil, demander les permissions
     }
 
-    private void editAddressTextView(Address address) {
-        text.setText(
-                "Pays:  " + address.getCountryName() + "\n" +
-                "Ville: " + address.getLocality() + "\n");
-    }
+    //TODO 6: Créer la méthode editAddressTextView() pour afficher le nom du pays et de la ville de l'adresse
 }
