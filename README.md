@@ -17,7 +17,7 @@ Vous pouvez également au besoin consulter une version terminée sur la branche 
 $ git checkout final
 ```
 
-##Installation du SDK Google Play services
+## Installation du SDK Google Play services
 
 L'API est incluse dans le SDK Google Play services, disponible sur Android depuis la version 2.3. Il faut donc commencer par configurer Android Studio pour utiliser le SDK.
 
@@ -25,7 +25,7 @@ Dans Android Studio, ajouter le package de services Google Play :
 
 Tools->Android->SDK Manager : onglet SDK Tools, cocher Google Play services, et cliquer sur Apply.
 
-##Activer la clé api (TODO 1):
+## Activer la clé api (TODO 1):
 
 L'utilisation de l'API Maps nécessite une clé d'authentification liée à un projet sur un compte Google. Vous allez ici utiliser la mienne.
 
@@ -50,7 +50,7 @@ private void enableMyLocation() {
 }
 ```
 
-###Gestion du résultat de la permission (TODO 3) :
+### Gestion du résultat de la permission (TODO 3) :
 On gère ici le retour de la demande de permissions. Si on les a obtenues, on appelle de nouveau la méthode **`enableMyLocation()`**.
 ```java
 @Override
@@ -66,7 +66,7 @@ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permis
 }
 ```
 
-###Afficher un message indiquant que les permissions n'ont pas été acceptées (TODO 4) :
+### Afficher un message indiquant que les permissions n'ont pas été acceptées (TODO 4) :
 
 ```java
 @Override
@@ -82,11 +82,11 @@ protected void onResumeFragments() {
 
 Voilà pour la localisation. Vous pouvez à présent tester si ces étapes se sont bien déroulées.
 
-##Gérer le clic sur la map :
+## Gérer le clic sur la map :
 
 On veut maintenant pouvoir cliquer à n'importe quel endroit de la map afin d'obtenir des informations sur ce lieu, et y afficher un marqueur.
 
-###Créer le listener (TODO 5) :
+### Créer le listener (TODO 5) :
 Ici on override la méthode **`onMapClick()`** de l'interface **`OnMapClickListener`**. Cela permet de gérer l'événement clic sur la map, et d'obtenir le point sur lequel on a cliqué. La classe **`Geocoder`** permet de convertir des coordonnées en **`Address`**, à partir de  quoi on peut obtenir des informations de lieu. On ajoute ensuite un **`Marker`** sur la map à la position souhaitée, en ayant au préalable nettoyé la carte des précédents marqueurs.
 ```java
 @Override
@@ -104,7 +104,7 @@ public void onMapClick(LatLng latLng) {
 }
 ```
 
-###Afficher l'addresse sur la page (TODO 6) :
+### Afficher l'addresse sur la page (TODO 6) :
 Ici on récupère une **`Address`** et on affiche le nom du pays et de la ville auxquels elle appartient.
 ```java
 private void editAddressTextView(Address address) {
@@ -115,7 +115,7 @@ private void editAddressTextView(Address address) {
 ```
 Vous pouvez maitenant tester.
 
-##Gérer la recherche de lieu (TODO 7) :
+## Gérer la recherche de lieu (TODO 7) :
 
 On attaque dans cette dernière partie la recherche de lieu. Au clic sur le bouton, on veut rechercher un lieu à partir du texte entré dans le champ texte. Tout va donc se passer dans la méthode **`onClick()`** :
 
@@ -166,11 +166,11 @@ CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition
 mMap.animateCamera(cameraUpdate);
 ```
 
-##Conclusion
+## Conclusion
 
 Nous avons donc vu les bases de l'interaction avec un objet Maps dans Android. N'hésitez pas à aller voir la documentation officielle pour aller plus loin.
 
-##Liens
+## Liens
 
 - https://developers.google.com/maps/documentation/android-api/start : documentation officielle
 - https://github.com/googlemaps/android-samples : dépôt contenant un nombre conséquent d'exemples
