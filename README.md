@@ -33,10 +33,10 @@ L'utilisation de l'API Maps nécessite une clé d'authentification liée à un p
 <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">AIzaSyDKQFkjt-YcuRci4W0xTo8NO1aDVQtNzjw</string>
 ```
 
-##Activer ma localisation
+## Activer ma localisation
 On veut ici pouvoir afficher sur la map notre position actuelle.
 
-###Demande de permission (TODO 2)
+### Demande de permission (TODO 2)
 
 On utilise la demande de permission afin de demander à l'utilisateur l'autorisation d'utiliser sa localisation. Cette méthode teste si la permission est déjà accordée, si ce n'est pas le cas on la demande, sinon on utilise la méthode **`setMyLocationEnabled()`** pour mettre cette propriété de la map à vrai.
 
